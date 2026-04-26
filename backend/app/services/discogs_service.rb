@@ -7,8 +7,15 @@ class DiscogsService
 
   # Returns { discogs_master_id:, country:, genres: [], styles: [] } or nil
   def lookup(album)
+    artist = album.artists.first&.name
     data = search_by_upc(album.upc) if album.upc.present?
-    data ||= search_by_title(album.name, album.artists.first&.name)
+    data = nil if data&.dig("results", 0).nil?
+
+    data ||= search_by_title(album.name, artist)
+    data = nil if data&.dig("results", 0).nil?
+
+    # Broader fallback: general keyword search
+    data ||= search_general(album.name, artist)
     return nil unless data
 
     result = data.dig("results", 0)
@@ -32,9 +39,14 @@ class DiscogsService
   end
 
   def search_by_title(title, artist)
-    params = { release_title: title, type: "release" }
+    params = { release_title: title, type: "master" }
     params[:artist] = artist if artist.present?
     get("/database/search", **params)
+  end
+
+  def search_general(title, artist)
+    q = artist.present? ? "#{title} #{artist}" : title
+    get("/database/search", q: q, type: "master")
   end
 
   def get(path, **params)
