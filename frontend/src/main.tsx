@@ -6,7 +6,7 @@ import './index.css'
 import App from './App'
 
 const theme = createTheme({
-  primaryColor: 'green',
+  primaryColor: 'orange',
 })
 
 createRoot(document.getElementById('root')!).render(
