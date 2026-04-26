@@ -1,0 +1,14 @@
+.env
+*.sqlite3
+*.sqlite3-*
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+!/tmp/pids
+/tmp/pids/*
+!/tmp/pids/.keep
+/storage/*
+!/storage/.keep
+/public/assets
+/config/master.key
