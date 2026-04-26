@@ -6,11 +6,33 @@ module Api
     end
 
     def show
-      album = Album.includes(:artists, :genres).find_by!(spotify_id: params[:id])
+      album = Album.includes(:artists, :genres).find_by!(spotify_id: params[:spotify_id])
+      render json: serialize(album)
+    end
+
+    def update
+      album = Album.includes(:artists, :genres).find_by!(spotify_id: params[:spotify_id])
+      album.update!(album_params)
+      replace_discogs_genres(album, params[:album][:genres]) if params[:album].key?(:genres)
+      album.reload
       render json: serialize(album)
     end
 
     private
+
+    def album_params
+      params.require(:album).permit(:name, :release_date, :label, :country, :total_tracks)
+    end
+
+    def replace_discogs_genres(album, genre_params)
+      album.album_genres.joins(:genre).where(genres: { source: "discogs" }).destroy_all
+      Array(genre_params).each do |g|
+        kind = g[:kind].to_s
+        next unless Genre::KINDS.include?(kind)
+        genre = Genre.find_or_create_by!(name: g[:name].to_s.strip, source: "discogs", kind: kind)
+        album.album_genres.find_or_create_by!(genre: genre)
+      end
+    end
 
     def serialize(album)
       {

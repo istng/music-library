@@ -26,6 +26,22 @@ export function getSyncStatus(): Promise<{ total: number; unenriched: number; la
   return request('/sync/status')
 }
 
+export interface AlbumUpdate {
+  name?: string
+  release_date?: string | null
+  label?: string | null
+  country?: string | null
+  total_tracks?: number | null
+  genres?: { name: string; kind: string }[]
+}
+
+export function updateAlbum(spotifyId: string, data: AlbumUpdate): Promise<Album> {
+  return request<BackendAlbum>(`/albums/${spotifyId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ album: data }),
+  }).then(mapAlbum)
+}
+
 // Maps the Rails snake_case response to our frontend Album shape
 interface BackendAlbum {
   spotify_id: string

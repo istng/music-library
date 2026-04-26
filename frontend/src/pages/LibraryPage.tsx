@@ -1,9 +1,12 @@
+import { useState, useMemo } from 'react'
 import { provider } from '../providers'
 import { useAlbums } from '../hooks/useAlbums'
 import { useFilters } from '../hooks/useFilters'
 import { useSyncLibrary } from '../hooks/useSyncLibrary'
 import FilterSidebar from '../components/FilterSidebar'
 import AlbumCard from '../components/AlbumCard'
+import AlbumEditModal from '../components/AlbumEditModal'
+import type { Album } from '../providers/types'
 
 export default function LibraryPage() {
   const { albums, loading, error, reload } = useAlbums()
@@ -12,6 +15,20 @@ export default function LibraryPage() {
     search, setSearch, sort, cycleSortField,
   } = useFilters(albums)
   const { syncing, synced, total: syncTotal, error: syncError, sync } = useSyncLibrary(reload)
+  const [editMode, setEditMode]         = useState(false)
+  const [editingAlbum, setEditingAlbum] = useState<Album | null>(null)
+
+  const genreOptions = useMemo(() => {
+    const s = new Set<string>()
+    albums.forEach((a) => a.genres.filter((g) => g.source === 'discogs' && g.kind === 'genre').forEach((g) => s.add(g.name)))
+    return [...s].sort()
+  }, [albums])
+
+  const styleOptions = useMemo(() => {
+    const s = new Set<string>()
+    albums.forEach((a) => a.genres.filter((g) => g.source === 'discogs' && g.kind === 'style').forEach((g) => s.add(g.name)))
+    return [...s].sort()
+  }, [albums])
 
   if (!provider.isAuthenticated()) {
     return (
@@ -28,6 +45,12 @@ export default function LibraryPage() {
       <header className="library-header">
         <h1>My Albums</h1>
         <div className="sync-bar">
+          <button
+            className={`sync-button edit-toggle${editMode ? ' edit-toggle--active' : ''}`}
+            onClick={() => setEditMode((m) => !m)}
+          >
+            {editMode ? 'Salir de edición' : 'Editar'}
+          </button>
           {syncing ? (
             <span className="sync-progress">Syncing {synced} / {syncTotal}…</span>
           ) : (
@@ -64,12 +87,27 @@ export default function LibraryPage() {
           )}
           <div className="album-grid">
             {filtered.map((album) => (
-              <AlbumCard key={album.id} album={album} />
+              <AlbumCard
+                key={album.id}
+                album={album}
+                editMode={editMode}
+                onEdit={setEditingAlbum}
+              />
             ))}
           </div>
           {loading && <p className="status-message">Loading…</p>}
         </section>
       </div>
+
+      {editingAlbum && (
+        <AlbumEditModal
+          album={editingAlbum}
+          genreOptions={genreOptions}
+          styleOptions={styleOptions}
+          onClose={() => setEditingAlbum(null)}
+          onSaved={() => { setEditingAlbum(null); reload() }}
+        />
+      )}
     </div>
   )
 }

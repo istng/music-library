@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   namespace :api do
-    resources :albums, only: [ :index, :show ], param: :id
+    resources :albums, only: [ :index, :show, :update ], param: :spotify_id
     post  "sync",          to: "sync#create"
     get   "sync/status",   to: "sync#status"
     post  "auth/spotify",  to: "auth#spotify"
