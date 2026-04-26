@@ -43,7 +43,7 @@ export default function LibraryPage() {
   return (
     <div className="library-screen">
       <header className="library-header">
-        <h1>My Albums</h1>
+        <h1>My Albums <span className="album-count">{filtered.length}</span></h1>
         <div className="sync-bar">
           <button
             className={`sync-button edit-toggle${editMode ? ' edit-toggle--active' : ''}`}

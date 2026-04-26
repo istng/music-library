@@ -80,6 +80,17 @@ button:hover {
 }
 
 .library-header h1 { font-size: 1.75rem; }
+.album-count {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.1rem 0.65rem;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
 
 .sync-bar {
   display: flex;
