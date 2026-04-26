@@ -194,6 +194,8 @@ const COUNTRIES: Record<string, string> = {
   XW: 'Mundial',       // MusicBrainz pseudo-code for worldwide releases
 }
 
+export { COUNTRIES }
+
 export function countryName(code: string | null | undefined): string {
   if (!code) return ''
   return COUNTRIES[code.toUpperCase()] ?? code

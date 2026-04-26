@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
-  Modal, Stack, TextInput, NumberInput, TagsInput,
+  Modal, Stack, TextInput, NumberInput, TagsInput, Select,
   Group, Button, Text, Image, SimpleGrid,
 } from '@mantine/core'
 import type { Album } from '../providers/types'
 import { updateAlbum } from '../api/backend'
+import { COUNTRIES } from '../utils/countries'
 
 interface Props {
   album: Album
@@ -29,6 +30,13 @@ export default function AlbumEditModal({ album, genreOptions, styleOptions, onCl
   const [saving, setSaving]           = useState(false)
   const [error, setError]             = useState<string | null>(null)
 
+  const countryOptions = useMemo(
+    () => Object.entries(COUNTRIES)
+      .map(([value, label]) => ({ value, label: `${label} (${value})` }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es')),
+    []
+  )
+
   async function handleSave() {
     setSaving(true)
     setError(null)
@@ -52,7 +60,7 @@ export default function AlbumEditModal({ album, genreOptions, styleOptions, onCl
   }
 
   return (
-    <Modal opened onClose={onClose} title="Editar álbum" size="sm" centered>
+    <Modal opened onClose={onClose} title="Editar álbum" size="lg" centered>
       <Stack gap="md">
         {album.imageUrl && (
           <Image src={album.imageUrl} alt={album.name} radius="sm" />
@@ -91,11 +99,14 @@ export default function AlbumEditModal({ album, genreOptions, styleOptions, onCl
             value={label}
             onChange={(e) => setLabel(e.target.value)}
           />
-          <TextInput
-            label="País (código)"
-            value={country}
-            onChange={(e) => setCountry(e.target.value.toUpperCase())}
-            maxLength={2}
+          <Select
+            label="País"
+            data={countryOptions}
+            value={country || null}
+            onChange={(v) => setCountry(v ?? '')}
+            searchable
+            clearable
+            placeholder="Buscar país…"
           />
         </SimpleGrid>
 
