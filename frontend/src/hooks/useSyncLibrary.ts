@@ -31,12 +31,13 @@ export function useSyncLibrary(onComplete?: () => void) {
         total = batch.total
 
         setState((s) => ({ ...s, total }))
-        await syncBatch(batch.items)
+        const result = await syncBatch(batch.items)
 
         offset += BATCH_SIZE
         setState((s) => ({ ...s, synced: Math.min(offset, total) }))
 
         if (!batch.hasMore) break
+        if (result.inserted === 0) break  // reached albums already in DB
       } while (true)
 
       setState((s) => ({ ...s, syncing: false }))

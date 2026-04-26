@@ -15,7 +15,7 @@ export function getAlbums(): Promise<Album[]> {
   return request<BackendAlbum[]>('/albums').then((data) => data.map(mapAlbum))
 }
 
-export function syncBatch(albums: SyncItem[]): Promise<{ synced: number }> {
+export function syncBatch(albums: SyncItem[]): Promise<{ synced: number; inserted: number }> {
   return request('/sync', {
     method: 'POST',
     body: JSON.stringify({ albums }),

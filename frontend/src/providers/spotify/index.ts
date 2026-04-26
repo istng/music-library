@@ -43,8 +43,14 @@ export class SpotifyProvider implements MusicProvider {
   private async getAccessToken(): Promise<string> {
     if (!this.token) throw new Error('Not authenticated')
     if (Date.now() >= this.token.expiresAt - 60_000) {
-      this.token = await refreshAccessToken(this.token.refreshToken, this.clientId)
-      localStorage.setItem(TOKEN_KEY, JSON.stringify(this.token))
+      try {
+        this.token = await refreshAccessToken(this.token.refreshToken, this.clientId)
+        localStorage.setItem(TOKEN_KEY, JSON.stringify(this.token))
+      } catch {
+        this.token = null
+        localStorage.removeItem(TOKEN_KEY)
+        throw new Error('Sesión expirada — reconectá tu cuenta de Spotify')
+      }
     }
     return this.token.accessToken
   }

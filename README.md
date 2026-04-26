@@ -107,6 +107,17 @@ cd backend
 bundle exec rails enrichment:run_all
 ```
 
+### Re-enrich albums with missing data
+
+Albums that were processed but came back with no genres and no country (API miss, rate limit, or no match) are still marked as enriched and skipped by `run_all`. To retry only those:
+
+```bash
+cd backend
+bundle exec rails enrichment:retry_empty
+```
+
+Safe to run multiple times — only targets albums with `enriched_at` set but zero genres and no country.
+
 ---
 
 ## Features

@@ -5,16 +5,18 @@ module Api
     def create
       albums_data = params.require(:albums)
       upserted = 0
+      inserted = 0
 
       ActiveRecord::Base.transaction do
         albums_data.each do |data|
-          album = upsert_album(data)
+          album, is_new = upsert_album(data)
           upserted += 1
+          inserted += 1 if is_new
           EnrichAlbumJob.perform_later(album.id) if album.enriched_at.nil?
         end
       end
 
-      render json: { synced: upserted }, status: :ok
+      render json: { synced: upserted, inserted: inserted }, status: :ok
     end
 
     # GET /api/sync/status
@@ -30,6 +32,7 @@ module Api
 
     def upsert_album(data)
       album = Album.find_or_initialize_by(spotify_id: data[:id])
+      is_new = album.new_record?
       album.assign_attributes(
         name:                   data[:name],
         album_type:             data[:album_type],
@@ -47,7 +50,7 @@ module Api
       album.save!
 
       sync_artists(album, Array(data[:artists]))
-      album
+      [ album, is_new ]
     end
 
     def sync_artists(album, artists_data)

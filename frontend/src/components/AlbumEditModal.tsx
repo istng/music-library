@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import {
   Modal, Stack, TextInput, NumberInput, TagsInput, Select,
-  Group, Button, Text, Image, SimpleGrid,
+  Group, Button, Text, Image, Box, SimpleGrid,
 } from '@mantine/core'
 import type { Album } from '../providers/types'
 import { updateAlbum } from '../api/backend'
@@ -60,81 +60,89 @@ export default function AlbumEditModal({ album, genreOptions, styleOptions, onCl
   }
 
   return (
-    <Modal opened onClose={onClose} title="Editar álbum" size="lg" centered>
-      <Stack gap="md">
-        {album.imageUrl && (
-          <Image src={album.imageUrl} alt={album.name} radius="sm" />
-        )}
+    <Modal opened onClose={onClose} title="Editar álbum" size="1000px" centered>
+      <Group align="flex-start" wrap="nowrap" gap="xl">
 
-        <TextInput
-          label="Nombre"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        {/* Left: cover */}
+        <Box w={260} style={{ flexShrink: 0 }}>
+          {album.imageUrl
+            ? <Image src={album.imageUrl} alt={album.name} radius="sm" />
+            : <Box h={260} style={{ background: 'var(--border)', borderRadius: 8 }} />}
+        </Box>
 
-        <TextInput
-          label="Artistas"
-          value={album.artists.map((a) => a.name).join(', ')}
-          disabled
-        />
-
-        <SimpleGrid cols={2}>
+        {/* Right: fields */}
+        <Stack style={{ flex: 1 }} gap="sm">
           <TextInput
-            label="Fecha de lanzamiento"
-            value={releaseDate}
-            onChange={(e) => setReleaseDate(e.target.value)}
-            placeholder="YYYY-MM-DD"
+            label="Nombre"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
-          <NumberInput
-            label="Pistas"
-            value={totalTracks}
-            onChange={setTotalTracks}
-            min={1}
-          />
-        </SimpleGrid>
 
-        <SimpleGrid cols={2}>
           <TextInput
-            label="Sello"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
+            label="Artistas"
+            value={album.artists.map((a) => a.name).join(', ')}
+            disabled
           />
-          <Select
-            label="País"
-            data={countryOptions}
-            value={country || null}
-            onChange={(v) => setCountry(v ?? '')}
-            searchable
+
+          <SimpleGrid cols={2}>
+            <TextInput
+              label="Fecha de lanzamiento"
+              value={releaseDate}
+              onChange={(e) => setReleaseDate(e.target.value)}
+              placeholder="YYYY-MM-DD"
+            />
+            <NumberInput
+              label="Pistas"
+              value={totalTracks}
+              onChange={setTotalTracks}
+              min={1}
+            />
+          </SimpleGrid>
+
+          <SimpleGrid cols={2}>
+            <TextInput
+              label="Sello"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+            <Select
+              label="País"
+              data={countryOptions}
+              value={country || null}
+              onChange={(v) => setCountry(v ?? '')}
+              searchable
+              clearable
+              placeholder="Buscar país…"
+            />
+          </SimpleGrid>
+
+          <TagsInput
+            label="Géneros (Discogs)"
+            data={genreOptions}
+            value={genres}
+            onChange={setGenres}
+            placeholder="Agregar género…"
             clearable
-            placeholder="Buscar país…"
           />
-        </SimpleGrid>
 
-        <TagsInput
-          label="Géneros (Discogs)"
-          data={genreOptions}
-          value={genres}
-          onChange={setGenres}
-          placeholder="Agregar género…"
-          clearable
-        />
+          <TagsInput
+            label="Estilos (Discogs)"
+            data={styleOptions}
+            value={styles}
+            onChange={setStyles}
+            placeholder="Agregar estilo…"
+            clearable
+          />
 
-        <TagsInput
-          label="Estilos (Discogs)"
-          data={styleOptions}
-          value={styles}
-          onChange={setStyles}
-          placeholder="Agregar estilo…"
-          clearable
-        />
+          {error && <Text size="sm" c="red">{error}</Text>}
 
-        {error && <Text size="sm" c="red">{error}</Text>}
+          <Group justify="flex-end" mt="xs">
+            <Button variant="default" onClick={onClose} disabled={saving}>Cancelar</Button>
+            <Button onClick={handleSave} loading={saving}>Guardar</Button>
+          </Group>
+        </Stack>
 
-        <Group justify="flex-end">
-          <Button variant="default" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button onClick={handleSave} loading={saving}>Guardar</Button>
-        </Group>
-      </Stack>
+      </Group>
     </Modal>
   )
 }
